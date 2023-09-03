@@ -1,0 +1,49 @@
+<html lang="en">
+  <head>
+    <script>
+      const divMessages = document.querySelector("#divMessages");
+      const tbMessage = document.querySelector("#tbMessage");
+      const btnSend = document.querySelector("#btnSend");
+      const username = new Date().getTime();
+
+      const connection = new signalR.HubConnectionBuilder()
+        .withUrl("/chat")
+        .build();
+
+      connection.on("messageReceived", (username, message) => {
+        const m = document.createElement("div");
+
+        m.innerHTML = `<div class="message-author">${username}</div><div>${message}</div>`;
+
+        divMessages.appendChild(m);
+        divMessages.scrollTop = divMessages.scrollHeight;
+      });
+
+      connection.start().catch((err) => document.write(err));
+
+      tbMessage.addEventListener("keyup", (e) => {
+        if (e.key === "Enter") {
+          send();
+        }
+      });
+
+      btnSend.addEventListener("click", send);
+
+      function send() {
+        connection
+          .send("newMessage", username, tbMessage.value)
+          .then(() => (tbMessage.value = ""));
+      }
+    </script>
+    <title>ASP.NET Core SignalR with TypeScript and Webpack</title>
+  </head>
+  <body>
+    <div id="divMessages" className="messages"></div>
+    <div className="input-zone">
+      <label id="lblMessage" htmlFor="tbMessage"> Message: </label>
+      <input id="tbMessage" className="input-zone-input" type="text" />
+      <button id="btnSend">Send</button>
+    </div>
+  </body>
+  <style></style>
+</html>
